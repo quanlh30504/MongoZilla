@@ -1,13 +1,157 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoZilla</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/collection-view.css">
+    <link rel="stylesheet" href="css/index-view.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>MongoZilla</h2>
+            </div>
+            <div class="collections-list">
+                <h3>Collections</h3>
+                <div id="collections-container"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="breadcrumb" id="breadcrumb"></div>
+                <div class="actions">
+                    <button id="refreshBtn">Refresh</button>
+                    <button id="createCollectionBtn" class="primary">Create Collection</button>
+                </div>
+            </div>
+
+            <div class="content-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="documents">Documents</button>
+                    <button class="tab-btn" data-tab="indexes">Indexes</button>
+                    <button class="tab-btn" data-tab="query">Query</button>
+                    <button class="tab-btn" data-tab="schema">Schema</button>
+                </div>
+            </div>
+
+            <div class="tab-content">
+                <!-- Documents View -->
+                <div id="documents-view" class="tab-panel active">
+                    <div class="documents-toolbar">
+                        <button id="addDocumentBtn">Add Document</button>
+                        <div class="search-box">
+                            <input type="text" id="documentSearch" placeholder="Search documents...">
+                        </div>
+                        <div class="page-size-control">
+                            <label for="pageSize">Items per page:</label>
+                            <select id="pageSize">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="documents-container">
+                        <div class="documents-list" id="documents-list"></div>
+                        <div class="document-editor" id="document-editor">
+                            <div class="editor-header">
+                                <h3>Edit Document</h3>
+                                <button id="saveDocumentBtn">Save</button>
+                            </div>
+                            <textarea id="documentContent"></textarea>
+                        </div>
+                    </div>
+                    <div id="pagination-controls" class="pagination-controls"></div>
+                </div>
+
+                <!-- Indexes View -->
+                <div id="indexes-view" class="tab-panel">
+                    <div class="indexes-toolbar">
+                        <button id="createIndexBtn">Create Index</button>
+                    </div>
+                    <table class="indexes-table">
+                        <thead>
+                            <tr>
+                              <th>Index Name</th>
+                              <th>Fields</th>
+                              <th>Include Full Data</th>
+                              <th>Size</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>                          
+                        <tbody id="indexes-list"></tbody>
+                    </table>
+                </div>
+
+                <!-- Query View -->
+                <div id="query-view" class="tab-panel">
+                    <div class="query-container">
+                        <div class="query-editor">
+                            <button id="executeQueryBtn">Execute Query</button>
+                            <h3>Query Conditions</h3>
+                            <textarea id="queryConditions" placeholder="Enter query conditions in JSON format..."></textarea>
+                            
+                        </div>
+                        <div class="query-results">
+                            <div class="query-stats">
+                                <span>Query Time: <span id="queryTime">-</span> ms</span>
+                                <span>Index Used: <span id="indexUsed">-</span></span>
+                            </div>
+                            <h3>Results</h3>
+                            <pre id="queryResults"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="createCollectionModal" class="modal">
+        <div class="modal-content">
+            <h3>Create Collection</h3>
+            <input type="text" id="newCollectionName" placeholder="Collection name">
+            <div class="modal-actions">
+                <button id="cancelCreateCollection">Cancel</button>
+                <button id="confirmCreateCollection" class="primary">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="createIndexModal" class="modal">
+        <div class="modal-content">
+            <h3>Create Index</h3>
+            <div class="form-group">
+                <label for="indexFields">Fields to Index (comma-separated):</label>
+                <input type="text" id="indexFields" placeholder="e.g. name,age,city">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="includeFullData" checked>
+                    Include Full Document Data
+                </label>
+                <p class="help-text">When checked, the index will store a copy of the full document. This increases storage but improves query performance.</p>
+            </div>
+            <div class="modal-actions">
+                <button id="cancelCreateIndex">Cancel</button>
+                <button id="confirmCreateIndex" class="primary">Create Index</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/collections.js"></script>
+    <script src="js/documents.js"></script>
+    <script src="js/indexes.js"></script>
+    <script src="js/query.js"></script>
+    <script src="js/utils.js"></script>
+</body>
 </html>

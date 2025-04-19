@@ -1,0 +1,78 @@
+.indexes-toolbar {
+    margin-bottom: 16px;
+}
+
+.indexes-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.indexes-table th,
+.indexes-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.indexes-table th {
+    background-color: #fafafa;
+    font-weight: 600;
+    color: #666;
+}
+
+.index-name {
+    font-weight: 500;
+}
+
+.index-definition {
+    color: #666;
+    font-size: 13px;
+    font-family: monospace;
+}
+
+.index-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    background-color: #e6f7ff;
+    color: #0050b3;
+}
+
+.index-type.unique {
+    background-color: #f6ffed;
+    color: #389e0d;
+}
+
+.index-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.index-status.ready {
+    background-color: #f6ffed;
+    color: #389e0d;
+}
+
+.index-status.building {
+    background-color: #fff7e6;
+    color: #d46b08;
+}
+
+.delete-btn {
+    color: #ff4d4f;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.delete-btn:hover {
+    background-color: #fff1f0;
+    border-radius: 4px;
+}

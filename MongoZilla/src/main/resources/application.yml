@@ -14,11 +14,15 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-server:
-  port: 8080
   servlet:
     multipart:
-      max-file-size: 200MB
-      max-request-size: 210MB
-  
+      max-file-size: -1
+      max-request-size: -1
+
+logging:
+  level:
+    org.springframework.web.multipart: DEBUG
+
+number_partition:
+  main_collection: 6
+  GSI_collection: 6
