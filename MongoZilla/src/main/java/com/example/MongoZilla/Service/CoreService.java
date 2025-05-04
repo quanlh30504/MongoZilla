@@ -8,6 +8,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoDatabase;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CoreService {
 
     private final MongoTemplate mongoTemplate;
@@ -94,76 +96,76 @@ public class CoreService {
     }
 
 
-    /**
-     * Thực hiện tìm kiếm thông minh sử dụng index tối ưu nhất
-     * @param collectionName Tên collection cần tìm kiếm
-     * @param conditions Điều kiện tìm kiếm dạng Map<String, String>
-     * @return QueryResult chứa kết quả và thông tin về truy vấn
-     */
-    public QueryResult query(String collectionName, Map<String, String> conditions) {
-        long startTime = System.currentTimeMillis();
-
-        // Lấy tất cả các index được tạo cho collection này
-        List<IndexMetadata> indices = mongoTemplate.find(
-                Query.query(Criteria.where("collectionName").is(collectionName)),
-                IndexMetadata.class,
-                "index_config"
-        );
-
-        // Tìm index tối ưu nhất dựa trên các tiêu chí
-        IndexMetadata bestIndex = findOptimalIndex(indices, conditions);
-
-        List<Document> results;
-        String indexUsed = "none";
-        boolean usedIndex = false;
-        long queryTimeMs = 0;
-
-        // Bật MongoDB profiler tạm thởi để đo thởi gian thực hiện truy vấn
-        MongoDatabase db = mongoTemplate.getDb();
-        db.runCommand(new BasicDBObject("profile", 2)); // Bật profiler ở mức cao nhất
-
-        try {
-            // Nếu tìm thấy index phù hợp, sử dụng nó
-            if (bestIndex != null) {
-                long queryStartTime = System.currentTimeMillis();
-                results = queryUsingIndex(bestIndex, conditions, collectionName);
-                queryTimeMs = System.currentTimeMillis() - queryStartTime;
-                indexUsed = bestIndex.getIndexCollection();
-                usedIndex = true;
-            } else {
-                // Fallback: full scan nếu không tìm thấy index phù hợp
-                long queryStartTime = System.currentTimeMillis();
-                results = fallbackFullScan(collectionName, conditions);
-                queryTimeMs = System.currentTimeMillis() - queryStartTime;
-            }
-
-            // Lấy thông tin profiler (tùy chọn, nếu muốn thông tin chi tiết hơn)
-            Document profileData = mongoTemplate.getCollection("system.profile")
-                    .find()
-                    .sort(new BasicDBObject("ts", -1))
-                    .first();
-
-            if (profileData != null) {
-                // Sử dụng thởi gian từ MongoDB profiler nếu có
-                Number mongoTime = (Number) profileData.get("millis");
-                if (mongoTime != null) {
-                    queryTimeMs = mongoTime.longValue();
-                }
-            }
-        } finally {
-            // Tắt profiler sau khi hoàn thành
-            db.runCommand(new BasicDBObject("profile", 0));
-        }
-
-        long totalTimeMs = System.currentTimeMillis() - startTime;
-
-        Map<String, Object> performanceInfo = new HashMap<>();
-        performanceInfo.put("totalProcessingTimeMs", totalTimeMs);
-        performanceInfo.put("actualQueryTimeMs", queryTimeMs);
-        performanceInfo.put("indexSelectionTimeMs", totalTimeMs - queryTimeMs);
-
-        return new QueryResult(results, queryTimeMs, indexUsed, usedIndex, performanceInfo);
-    }
+//    /**
+//     * Thực hiện tìm kiếm thông minh sử dụng index tối ưu nhất
+//     * @param collectionName Tên collection cần tìm kiếm
+//     * @param conditions Điều kiện tìm kiếm dạng Map<String, String>
+//     * @return QueryResult chứa kết quả và thông tin về truy vấn
+//     */
+//    public QueryResult query(String collectionName, Map<String, String> conditions) {
+//        long startTime = System.currentTimeMillis();
+//
+//        // Lấy tất cả các index được tạo cho collection này
+//        List<IndexMetadata> indices = mongoTemplate.find(
+//                Query.query(Criteria.where("collectionName").is(collectionName)),
+//                IndexMetadata.class,
+//                "index_config"
+//        );
+//
+//        // Tìm index tối ưu nhất dựa trên các tiêu chí
+//        IndexMetadata bestIndex = findOptimalIndex(indices, conditions);
+//
+//        List<Document> results;
+//        String indexUsed = "none";
+//        boolean usedIndex = false;
+//        long queryTimeMs = 0;
+//
+//        // Bật MongoDB profiler tạm thởi để đo thởi gian thực hiện truy vấn
+//        MongoDatabase db = mongoTemplate.getDb();
+//        db.runCommand(new BasicDBObject("profile", 2)); // Bật profiler ở mức cao nhất
+//
+//        try {
+//            // Nếu tìm thấy index phù hợp, sử dụng nó
+//            if (bestIndex != null) {
+//                long queryStartTime = System.currentTimeMillis();
+//                results = queryUsingIndex(bestIndex, conditions, collectionName);
+//                queryTimeMs = System.currentTimeMillis() - queryStartTime;
+//                indexUsed = bestIndex.getIndexCollection();
+//                usedIndex = true;
+//            } else {
+//                // Fallback: full scan nếu không tìm thấy index phù hợp
+//                long queryStartTime = System.currentTimeMillis();
+//                results = fallbackFullScan(collectionName, conditions);
+//                queryTimeMs = System.currentTimeMillis() - queryStartTime;
+//            }
+//
+//            // Lấy thông tin profiler (tùy chọn, nếu muốn thông tin chi tiết hơn)
+//            Document profileData = mongoTemplate.getCollection("system.profile")
+//                    .find()
+//                    .sort(new BasicDBObject("ts", -1))
+//                    .first();
+//
+//            if (profileData != null) {
+//                // Sử dụng thởi gian từ MongoDB profiler nếu có
+//                Number mongoTime = (Number) profileData.get("millis");
+//                if (mongoTime != null) {
+//                    queryTimeMs = mongoTime.longValue();
+//                }
+//            }
+//        } finally {
+//            // Tắt profiler sau khi hoàn thành
+//            db.runCommand(new BasicDBObject("profile", 0));
+//        }
+//
+//        long totalTimeMs = System.currentTimeMillis() - startTime;
+//
+//        Map<String, Object> performanceInfo = new HashMap<>();
+//        performanceInfo.put("totalProcessingTimeMs", totalTimeMs);
+//        performanceInfo.put("actualQueryTimeMs", queryTimeMs);
+//        performanceInfo.put("indexSelectionTimeMs", totalTimeMs - queryTimeMs);
+//
+//        return new QueryResult(results, queryTimeMs, indexUsed, usedIndex, performanceInfo);
+//    }
 
     /**
      * Tìm index tối ưu nhất cho truy vấn
@@ -397,7 +399,10 @@ public class CoreService {
     }
 
 
-    public List<Document> queryMain(QueryRequest request) {
+    public QueryResult queryMain(QueryRequest request) {
+        log.info("Start query");
+
+        double queryStartTime = System.currentTimeMillis();
         String tableName = request.getTableName();
         Document config = mongoTemplate.findOne(
                 Query.query(Criteria.where("collectionName").is(tableName)),
@@ -455,20 +460,44 @@ public class CoreService {
             if (partitionVal != null) {
                 int partitionIndex = hashService.getPartitionIndex(partitionVal.toString(), numPartitions);
                 String partitionName = tableName + "_partition_" + partitionIndex;
+
+                log.info("Kết nối đến: {}", partitionName);
+
                 results.addAll(mongoTemplate.find(query, Document.class, partitionName));
             }
         } else {
             // Quét toàn bộ các partition nếu không có partition key
             for (int i = 0; i < numPartitions; i++) {
                 String partitionName = tableName + "_partition_" + i;
+                // Ghi log trước khi truy vấn
+                log.info("Kết nối đến: {}", partitionName);
+
+                // Thực hiện truy vấn và thêm vào danh sách kết quả
                 results.addAll(mongoTemplate.find(query, Document.class, partitionName));
+
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // giữ lại trạng thái interrupt
+                    throw new RuntimeException("Thread was interrupted", e);
+                }
             }
         }
 
-        return results;
+        double queryTime = System.currentTimeMillis() - queryStartTime;
+
+        return QueryResult.builder()
+                .queryTimeMs(queryTime)
+                .documents(results)
+                .build();
     }
 
-    public List<Document> queryGSI(QueryRequest request) {
+    public QueryResult queryGSI(QueryRequest request) {
+
+        log.info("Start query");
+
+        double queryStartTime = System.currentTimeMillis();
+
         String gsiIndexName = request.getIndexName();
 
         // Lấy thông tin config của GSI
@@ -696,7 +725,12 @@ public class CoreService {
                 results = rawResults;
         }
 
-        
-        return results;
+
+        double queryTime = System.currentTimeMillis() - queryStartTime;
+
+        return QueryResult.builder()
+                .queryTimeMs(queryTime)
+                .documents(results)
+                .build();
     }
 }

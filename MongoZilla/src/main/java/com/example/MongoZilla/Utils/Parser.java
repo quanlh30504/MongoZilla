@@ -24,8 +24,7 @@ public class Parser {
                 String field = matcher.group(1).trim();
                 String placeholder = matcher.group(3).trim();
                 
-                // Loại bỏ dấu : ở đầu placeholder để khớp với key trong valueMap
-                String placeholderKey = placeholder.startsWith(":") ? 
+                String placeholderKey = placeholder.startsWith(":") ?
                                       placeholder.substring(1) : placeholder;
                 
                 map.put(field, placeholderKey);
@@ -130,7 +129,6 @@ public class Parser {
         String[] parts = expression.split("(?i)\\s+AND\\s+");
         for (String part : parts) {
             // Tìm các toán tử trong biểu thức (>, <, >=, <=, =, BETWEEN, IN)
-            // Đảm bảo tìm đúng placeholder với dấu : ở đầu
             Matcher matcher = Pattern.compile("(\\w+)\\s*(=|>|>=|<|<=|BETWEEN|IN)\\s*(:\\w+)").matcher(part.trim());
 
             if (matcher.find()) {
@@ -138,21 +136,19 @@ public class Parser {
                 String operator = matcher.group(2).trim();
                 String placeholder = matcher.group(3).trim();
                 
-                // Loại bỏ dấu : ở đầu placeholder để khớp với key trong valueMap
-                String placeholderKey = placeholder.startsWith(":") ? 
+                String placeholderKey = placeholder.startsWith(":") ?
                                       placeholder.substring(1) : placeholder;
                 
                 // Kiểm tra xem placeholder có tồn tại trong valueMap không
                 if (!valueMap.containsKey(placeholderKey)) {
-                    continue; // Bỏ qua điều kiện này nếu không tìm thấy giá trị
+                    continue;
                 }
                 
                 Object value = valueMap.get(placeholderKey);
                 if (value == null) {
-                    continue; // Bỏ qua nếu giá trị là null
+                    continue;
                 }
 
-                // Kiểm tra kiểu dữ liệu và xử lý toán tử tương ứng
                 try {
                     switch (operator) {
                         case "=":
@@ -171,17 +167,14 @@ public class Parser {
                             filterCriteriaList.add(Criteria.where(field).lte(value));
                             break;
                         case "BETWEEN":
-                            // Xử lý BETWEEN biểu thức
                             if (part.contains(" AND ")) {
                                 // Tìm hai placeholder trong biểu thức BETWEEN
-                                // Đảm bảo tìm đúng placeholder với dấu : ở đầu
-                                Matcher betweenMatcher = Pattern.compile("BETWEEN\\s*(:\\w+)\\s+AND\\s*(:\\w+)").matcher(part);
+                                                                Matcher betweenMatcher = Pattern.compile("BETWEEN\\s*(:\\w+)\\s+AND\\s*(:\\w+)").matcher(part);
                                 if (betweenMatcher.find()) {
                                     String startPlaceholder = betweenMatcher.group(1).trim();
                                     String endPlaceholder = betweenMatcher.group(2).trim();
                                     
-                                    // Loại bỏ dấu : ở đầu placeholder
-                                    String startPlaceholderKey = startPlaceholder.startsWith(":") ? 
+                                    String startPlaceholderKey = startPlaceholder.startsWith(":") ?
                                                               startPlaceholder.substring(1) : startPlaceholder;
                                     String endPlaceholderKey = endPlaceholder.startsWith(":") ? 
                                                             endPlaceholder.substring(1) : endPlaceholder;
@@ -210,13 +203,11 @@ public class Parser {
                             throw new IllegalArgumentException("Unsupported operator: " + operator);
                     }
                 } catch (Exception e) {
-                    // Log lỗi và bỏ qua điều kiện này
                     System.err.println("Error processing filter condition: " + part + ". Error: " + e.getMessage());
                 }
             }
         }
 
-        // Nếu không có điều kiện filter nào, trả về null
         if (filterCriteriaList.isEmpty()) {
             return null;
         }
@@ -229,8 +220,4 @@ public class Parser {
         // Nếu có nhiều điều kiện, kết hợp chúng với AND
         return new Criteria().andOperator(filterCriteriaList.toArray(new Criteria[0]));
     }
-
-
-
-
 }

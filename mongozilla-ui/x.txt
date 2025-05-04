@@ -1,0 +1,44 @@
+{
+    "_id": ObjectId("..."),        // MongoDB ObjectId
+    "field1": "value1",            // Tùy theo CSV
+    "field2": "value2",
+    ...
+    "createdAt": ISODate("..."),   // Audit (nếu cần)
+    "updatedAt": ISODate("...")
+}
+
+
+{
+  "_id": ObjectId("..."),                 // ID riêng
+  "indexKey": {
+    "status": "DELIVERED",               // Các field được index
+    "customerId": "12345"
+  },
+  "mainId": ObjectId("..."),             // Tham chiếu đến bản ghi gốc trong bảng chính
+  "fullData": {                          // Optional: chỉ dùng nếu muốn tối ưu tốc độ đọc
+    "field1": "value1",
+    "field2": "value2",
+    ...
+  },
+  "createdAt": ISODate("..."),
+  "updatedAt": ISODate("...")
+}
+
+{
+  "_id": ObjectId("..."),
+  "collectionName": "orders",
+  "fields": [ "id", "status", "amount", "createdAt" ],
+  "createdFrom": "orders.csv",          // Tên file gốc (nếu có)
+  "createdAt": ISODate("..."),
+  "updatedAt": ISODate("...")
+}
+
+{
+  "_id": ObjectId("..."),
+  "mainCollection": "orders",
+  "indexFields": [ "status", "customerId" ],
+  "indexCollection": "index_orders_status_customerId",
+  "includeFullData": true,              
+  "createdAt": ISODate("..."),
+  "updatedAt": ISODate("...")
+}

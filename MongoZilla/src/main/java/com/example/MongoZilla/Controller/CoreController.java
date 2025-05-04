@@ -76,12 +76,12 @@ public class CoreController {
         return ResponseEntity.ok("Index created successfully.");
     }
 
-
-    @PostMapping("/query")
-   public ResponseEntity<QueryResult> query(@RequestParam String collectionName,
-                                            @RequestBody Map<String, String> conditions) {
-       return ResponseEntity.ok(coreService.query(collectionName, conditions));
-   }
+//
+//    @PostMapping("/query")
+//   public ResponseEntity<QueryResult> query(@RequestParam String collectionName,
+//                                            @RequestBody Map<String, String> conditions) {
+//       return ResponseEntity.ok(coreService.query(collectionName, conditions));
+//   }
 
    /**
     * Lấy danh sách các collections chính (không bao gồm các bảng index)
@@ -103,12 +103,12 @@ public class CoreController {
    }
 
     @PostMapping("/query-main")
-    public ResponseEntity<List<org.bson.Document>> queryMain(@RequestBody QueryRequest request) {
+    public ResponseEntity<QueryResult> queryMain(@RequestBody QueryRequest request) {
         return ResponseEntity.ok(coreService.queryMain(request));
     }
 
     @PostMapping("/query-gsi")
-    public ResponseEntity<List<org.bson.Document>> queryGSI(@RequestBody QueryRequest request) {
+    public ResponseEntity<QueryResult> queryGSI(@RequestBody QueryRequest request) {
         return ResponseEntity.ok(coreService.queryGSI(request));
     }
 
